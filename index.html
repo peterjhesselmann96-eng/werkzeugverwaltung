@@ -1,0 +1,1986 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Werkzeugverwaltung</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-box h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+
+        .btn-primary {
+            width: 100%;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            margin: 0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tabs {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .nav-tabs button {
+            background: none;
+            border: none;
+            padding: 10px 20px;
+            margin-right: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .nav-tabs button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .nav-tabs button:hover:not(.active) {
+            background: #f8f9fa;
+        }
+
+        .content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .werkzeug-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .werkzeug-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .werkzeug-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .werkzeug-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            background: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: #6c757d;
+        }
+
+        .werkzeug-info h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .werkzeug-info p {
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-available {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-borrowed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .werkzeug-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .werkzeug-actions button {
+            flex: 1;
+            min-width: 80px;
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filters select {
+            padding: 10px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .file-upload {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+
+        .file-upload:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .camera-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .camera-buttons button {
+            flex: 1;
+        }
+
+        #cameraPreview {
+            width: 100%;
+            max-width: 300px;
+            margin: 10px auto;
+            display: block;
+            border-radius: 8px;
+        }
+
+        .admin-section {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .user-list {
+            display: grid;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .export-import {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 10000;
+            font-size: 14px;
+            max-width: 300px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast.error {
+            background: #dc3545;
+        }
+
+        // Loading-Spinner CSS
+        .loading-spinner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            background: rgba(255,255,255,0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .user-info {
+                justify-content: center;
+            }
+
+            .werkzeug-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+
+            .export-import {
+                flex-direction: column;
+            }
+
+            .werkzeug-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner hidden">
+        <div class="spinner"></div>
+        <div style="text-align: center;">Laden...</div>
+    </div>
+
+    <!-- Login Page -->
+    <div id="loginPage" class="login-container">
+        <div class="login-box">
+            <h2><i class="fas fa-tools"></i> Werkzeugverwaltung</h2>
+            <div class="form-group">
+                <label for="loginUsername">Benutzername:</label>
+                <input type="text" id="loginUsername" placeholder="Benutzername eingeben" required>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Passwort:</label>
+                <input type="password" id="loginPassword" placeholder="Passwort eingeben" required>
+            </div>
+            <button class="btn btn-primary" onclick="login()">
+                <i class="fas fa-sign-in-alt"></i> Anmelden
+            </button>
+            <div style="margin-top: 20px; padding: 15px; background: #e3f2fd; border-radius: 8px; font-size: 14px;">
+                <strong>Demo-Accounts:</strong><br>
+                <strong>admin</strong> / admin123 (Administrator)<br>
+                <strong>max</strong> / max123 (Benutzer)<br>
+                <strong>anna</strong> / anna123 (Benutzer)
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="hidden">
+        <div class="container">
+            <!-- Header -->
+            <div class="header">
+                <h1><i class="fas fa-tools"></i> Werkzeugverwaltung</h1>
+                <div class="user-info">
+                    <span id="currentUserDisplay"></span>
+                    <button class="btn btn-secondary" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Abmelden
+                    </button>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="nav-tabs">
+                <button class="active" onclick="showTab('dashboard')">
+                    <i class="fas fa-home"></i> Dashboard
+                </button>
+                <button onclick="showTab('werkzeuge')">
+                    <i class="fas fa-tools"></i> Werkzeuge verwalten
+                </button>
+                <button id="adminTab" class="hidden" onclick="showTab('admin')">
+                    <i class="fas fa-user-cog"></i> Administration
+                </button>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div id="dashboardContent" class="content">
+                <h2>Werkzeug-Übersicht</h2>
+                
+                <!-- Filters -->
+                <div class="filters">
+                    <select id="ownerFilter" onchange="filterWerkzeuge()">
+                        <option value="">Alle Besitzer</option>
+                    </select>
+                    <select id="statusFilter" onchange="filterWerkzeuge()">
+                        <option value="">Alle Status</option>
+                        <option value="available">Verfügbar</option>
+                        <option value="borrowed">Ausgeliehen</option>
+                    </select>
+                    <button class="btn" onclick="clearFilters()">
+                        <i class="fas fa-times"></i> Filter zurücksetzen
+                    </button>
+                </div>
+
+                <div id="werkzeugGrid" class="werkzeug-grid"></div>
+            </div>
+
+            <!-- Werkzeuge Tab -->
+            <div id="werkzeugeContent" class="content hidden">
+                <h2>Werkzeuge verwalten</h2>
+                <button class="btn" onclick="showWerkzeugModal()">
+                    <i class="fas fa-plus"></i> Neues Werkzeug hinzufügen
+                </button>
+
+                <div id="werkzeugManagementGrid" class="werkzeug-grid"></div>
+            </div>
+
+            <!-- Admin Tab -->
+            <div id="adminContent" class="content hidden">
+                <div class="admin-section">
+                    <h2><i class="fas fa-user-cog"></i> Benutzerverwaltung</h2>
+                    <button class="btn" onclick="showUserModal()">
+                        <i class="fas fa-user-plus"></i> Neuen Benutzer hinzufügen
+                    </button>
+                    
+                    <div id="userList" class="user-list"></div>
+                </div>
+
+                <div class="admin-section">
+                    <h3><i class="fas fa-database"></i> Datenmanagement</h3>
+                    <div class="export-import">
+                        <button class="btn btn-success" onclick="exportData()">
+                            <i class="fas fa-download"></i> Daten exportieren
+                        </button>
+                        <div>
+                            <input type="file" id="importFile" accept=".json" onchange="importData()" style="display: none;">
+                            <button class="btn" onclick="document.getElementById('importFile').click()">
+                                <i class="fas fa-upload"></i> Daten importieren
+                            </button>
+                        </div>
+                        <button class="btn btn-danger" onclick="clearAllData()">
+                            <i class="fas fa-trash-alt"></i> Alle Daten löschen
+                        </button>
+                    </div>
+                    <div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-radius: 5px; font-size: 12px;">
+                        <strong>💡 Server-Synchronisation:</strong> Alle Änderungen werden automatisch auf dem Server gespeichert und zwischen allen Geräten synchronisiert.
+                        <br><strong>Status:</strong> <span id="connectionStatus" style="color: green;">Verbunden</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="werkzeugModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeWerkzeugModal()">&times;</span>
+            <h2 id="werkzeugModalTitle">Werkzeug hinzufügen</h2>
+            
+            <div class="form-group">
+                <label for="werkzeugName">Name:</label>
+                <input type="text" id="werkzeugName" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="werkzeugOwner">Besitzer:</label>
+                <select id="werkzeugOwner" required></select>
+            </div>
+
+            <div class="form-group">
+                <label>Bild:</label>
+                <div class="camera-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="startCamera()">
+                        <i class="fas fa-camera"></i> Kamera
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('werkzeugImageFile').click()">
+                        <i class="fas fa-upload"></i> Datei wählen
+                    </button>
+                </div>
+                
+                <video id="cameraPreview" class="hidden" autoplay></video>
+                <canvas id="cameraCanvas" class="hidden"></canvas>
+                <button id="captureBtn" class="btn hidden" onclick="capturePhoto()">
+                    <i class="fas fa-camera"></i> Foto aufnehmen
+                </button>
+                
+                <div class="file-upload" onclick="document.getElementById('werkzeugImageFile').click()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Bild hier ablegen oder klicken zum Auswählen</p>
+                </div>
+                <input type="file" id="werkzeugImageFile" accept="image/*" style="display: none;" onchange="handleFileUpload(this)">
+                
+                <img id="imagePreview" class="werkzeug-image hidden" alt="Vorschau">
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="saveWerkzeug()">
+                    <i class="fas fa-save"></i> Speichern
+                </button>
+                <button class="btn btn-secondary" onclick="closeWerkzeugModal()">
+                    Abbrechen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeUserModal()">&times;</span>
+            <h2 id="userModalTitle">Benutzer hinzufügen</h2>
+            
+            <div class="form-group">
+                <label for="userName">Name:</label>
+                <input type="text" id="userName" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="userUsername">Benutzername:</label>
+                <input type="text" id="userUsername" required>
+            </div>
+
+            <div class="form-group">
+                <label for="userPassword">Passwort:</label>
+                <input type="password" id="userPassword" required>
+            </div>
+
+            <div class="form-group">
+                <label for="userRole">Rolle:</label>
+                <select id="userRole" required>
+                    <option value="user">Benutzer</option>
+                    <option value="admin">Administrator</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="saveUserFromModal()">
+                    <i class="fas fa-save"></i> Speichern
+                </button>
+                <button class="btn btn-secondary" onclick="closeUserModal()">
+                    Abbrechen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="checkoutModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCheckoutModal()">&times;</span>
+            <h2 id="checkoutModalTitle">Werkzeug ausleihen</h2>
+            
+            <div class="form-group">
+                <label for="borrowerSelect">Ausleiher:</label>
+                <select id="borrowerSelect" required></select>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="confirmCheckout()">
+                    <i class="fas fa-check"></i> Ausleihen
+                </button>
+                <button class="btn btn-secondary" onclick="closeCheckoutModal()">
+                    Abbrechen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeConfirmModal()">&times;</span>
+            <h2 id="confirmModalTitle">Bestätigung</h2>
+            <p id="confirmModalMessage"></p>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="confirmAction()">
+                    <i class="fas fa-check"></i> Ja
+                </button>
+                <button class="btn btn-secondary" onclick="closeConfirmModal()">
+                    <i class="fas fa-times"></i> Nein
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE = window.location.origin.includes('localhost') 
+            ? 'http://localhost:8888/api' 
+            : '/api';
+
+        // Globale Variablen
+        let currentUser = null;
+        let editingWerkzeug = null;
+        let editingUser = null;
+        let currentWerkzeugForCheckout = null;
+        let cameraStream = null;
+        let confirmCallback = null;
+        let users = [];
+        let werkzeuge = [];
+        let isLoading = false;
+
+        // Loading-Indicator aktualisiert
+        function setLoading(loading) {
+            isLoading = loading;
+            const spinner = document.getElementById('loadingSpinner');
+            const connectionStatus = document.getElementById('connectionStatus');
+            
+            if (loading) {
+                spinner?.classList.remove('hidden');
+                if (connectionStatus) {
+                    connectionStatus.textContent = 'Lädt...';
+                    connectionStatus.style.color = 'orange';
+                }
+            } else {
+                spinner?.classList.add('hidden');
+                if (connectionStatus) {
+                    connectionStatus.textContent = 'Verbunden';
+                    connectionStatus.style.color = 'green';
+                }
+            }
+        }
+
+        // API Funktionen
+        async function apiRequest(endpoint, options = {}) {
+            setLoading(true);
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                showToast('Verbindungsfehler zum Server', 'error');
+                throw error;
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // User API
+        async function loadUsers() {
+            try {
+                users = await apiRequest('/users');
+                return users;
+            } catch (error) {
+                console.error('Fehler beim Laden der Benutzer:', error);
+                return [];
+            }
+        }
+
+        async function saveUser(user) {
+            try {
+                if (user.id) {
+                    // Update existing user
+                    const updatedUser = await apiRequest('/users', {
+                        method: 'PUT',
+                        body: JSON.stringify(user)
+                    });
+                    
+                    const index = users.findIndex(u => u.id === user.id);
+                    if (index !== -1) {
+                        users[index] = updatedUser;
+                    }
+                    return updatedUser;
+                } else {
+                    // Create new user
+                    const newUser = await apiRequest('/users', {
+                        method: 'POST',
+                        body: JSON.stringify(user)
+                    });
+                    users.push(newUser);
+                    return newUser;
+                }
+            } catch (error) {
+                console.error('Fehler beim Speichern des Benutzers:', error);
+                throw error;
+            }
+        }
+
+        async function deleteUserFromServer(userId) {
+            try {
+                await apiRequest(`/users?id=${userId}`, {
+                    method: 'DELETE'
+                });
+                
+                users = users.filter(u => u.id !== userId);
+                return true;
+            } catch (error) {
+                console.error('Fehler beim Löschen des Benutzers:', error);
+                throw error;
+            }
+        }
+
+        // Werkzeug API
+        async function loadWerkzeuge() {
+            try {
+                werkzeuge = await apiRequest('/werkzeuge');
+                return werkzeuge;
+            } catch (error) {
+                console.error('Fehler beim Laden der Werkzeuge:', error);
+                return [];
+            }
+        }
+
+        async function saveWerkzeugToServer(werkzeug) {
+            try {
+                if (werkzeug.id) {
+                    // Update existing werkzeug
+                    const updatedWerkzeug = await apiRequest('/werkzeuge', {
+                        method: 'PUT',
+                        body: JSON.stringify(werkzeug)
+                    });
+                    
+                    const index = werkzeuge.findIndex(w => w.id === werkzeug.id);
+                    if (index !== -1) {
+                        werkzeuge[index] = updatedWerkzeug;
+                    }
+                    return updatedWerkzeug;
+                } else {
+                    // Create new werkzeug
+                    const newWerkzeug = await apiRequest('/werkzeuge', {
+                        method: 'POST',
+                        body: JSON.stringify(werkzeug)
+                    });
+                    werkzeuge.push(newWerkzeug);
+                    return newWerkzeug;
+                }
+            } catch (error) {
+                console.error('Fehler beim Speichern des Werkzeugs:', error);
+                throw error;
+            }
+        }
+
+        async function deleteWerkzeugFromServer(werkzeugId) {
+            try {
+                await apiRequest(`/werkzeuge?id=${werkzeugId}`, {
+                    method: 'DELETE'
+                });
+                
+                werkzeuge = werkzeuge.filter(w => w.id !== werkzeugId);
+                return true;
+            } catch (error) {
+                console.error('Fehler beim Löschen des Werkzeugs:', error);
+                throw error;
+            }
+        }
+
+        // Toast-Benachrichtigungen
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type === 'error' ? 'error' : ''}`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            // Animation
+            setTimeout(() => toast.classList.add('show'), 100);
+            
+            // Entfernen nach 3 Sekunden
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 3000);
+        }
+
+        // Eigenes Confirm-Modal
+        function showConfirmModal(title, message, callback) {
+            document.getElementById('confirmModalTitle').textContent = title;
+            document.getElementById('confirmModalMessage').textContent = message;
+            confirmCallback = callback;
+            document.getElementById('confirmModal').style.display = 'block';
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+            confirmCallback = null;
+        }
+
+        function confirmAction() {
+            if (confirmCallback) {
+                confirmCallback();
+                confirmCallback = null;
+            }
+            closeConfirmModal();
+        }
+
+        // Login/Logout Funktionen
+        function login() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            
+            if (!username || !password) {
+                showToast('Bitte geben Sie Benutzername und Passwort ein.', 'error');
+                return;
+            }
+            
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                document.getElementById('loginPage').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                document.getElementById('currentUserDisplay').textContent = user.name;
+                
+                // Eingabefelder zurücksetzen
+                document.getElementById('loginUsername').value = '';
+                document.getElementById('loginPassword').value = '';
+                
+                if (user.role === 'admin') {
+                    document.getElementById('adminTab').classList.remove('hidden');
+                }
+                
+                initializeApp();
+                showToast(`Willkommen, ${user.name}!`);
+            } else {
+                showToast('Ungültiger Benutzername oder Passwort.', 'error');
+                document.getElementById('loginPassword').value = '';
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('adminTab').classList.add('hidden');
+            
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+        }
+
+        // App Initialisierung
+        async function initializeApp() {
+            try {
+                await Promise.all([loadUsers(), loadWerkzeuge()]);
+                showTab('dashboard');
+                updateOwnerFilter();
+                renderDashboard();
+                renderWerkzeugManagement();
+                renderUserManagement();
+            } catch (error) {
+                showToast('Fehler beim Laden der Daten', 'error');
+            }
+        }
+
+        // Login mit Server-Validierung
+        async function login() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            
+            if (!username || !password) {
+                showToast('Bitte geben Sie Benutzername und Passwort ein.', 'error');
+                return;
+            }
+
+            try {
+                // Benutzer vom Server laden falls noch nicht geschehen
+                if (users.length === 0) {
+                    await loadUsers();
+                }
+
+                const user = users.find(u => u.username === username && u.password === password);
+                
+                if (user) {
+                    currentUser = user;
+                    document.getElementById('loginPage').classList.add('hidden');
+                    document.getElementById('mainApp').classList.remove('hidden');
+                    document.getElementById('currentUserDisplay').textContent = user.name;
+                    
+                    // Eingabefelder zurücksetzen
+                    document.getElementById('loginUsername').value = '';
+                    document.getElementById('loginPassword').value = '';
+                    
+                    if (user.role === 'admin') {
+                        document.getElementById('adminTab').classList.remove('hidden');
+                    }
+                    
+                    await initializeApp();
+                    showToast(`Willkommen, ${user.name}!`);
+                } else {
+                    showToast('Ungültiger Benutzername oder Passwort.', 'error');
+                    document.getElementById('loginPassword').value = '';
+                }
+            } catch (error) {
+                showToast('Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.', 'error');
+            }
+        }
+
+        // Daten laden beim ersten App-Start
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFromStorage();
+            
+            const loginUsername = document.getElementById('loginUsername');
+            const loginPassword = document.getElementById('loginPassword');
+            
+            [loginUsername, loginPassword].forEach(field => {
+                field.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        login();
+                    }
+                });
+            });
+        });
+
+        function showTab(tabName) {
+            document.querySelectorAll('.content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            document.querySelectorAll('.nav-tabs button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(tabName + 'Content').classList.remove('hidden');
+            
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+        }
+
+        // Werkzeug Rendering
+        function renderDashboard() {
+            const grid = document.getElementById('werkzeugGrid');
+            const filteredWerkzeuge = getFilteredWerkzeuge();
+            
+            if (filteredWerkzeuge.length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666;">Keine Werkzeuge gefunden.</p>';
+                return;
+            }
+            
+            grid.innerHTML = filteredWerkzeuge.map(werkzeug => createWerkzeugCard(werkzeug, true)).join('');
+        }
+
+        function renderWerkzeugManagement() {
+            const grid = document.getElementById('werkzeugManagementGrid');
+            
+            if (werkzeuge.length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666;">Noch keine Werkzeuge vorhanden.</p>';
+                return;
+            }
+            
+            grid.innerHTML = werkzeuge.map(werkzeug => createWerkzeugCard(werkzeug, false)).join('');
+        }
+
+        function createWerkzeugCard(werkzeug, isDashboard) {
+            const owner = users.find(u => u.username === werkzeug.owner);
+            const borrower = werkzeug.borrower ? users.find(u => u.username === werkzeug.borrower) : null;
+            const isAvailable = werkzeug.status === 'available';
+            
+            const imageHtml = werkzeug.image 
+                ? `<img src="${werkzeug.image}" class="werkzeug-image" alt="${werkzeug.name}">`
+                : `<div class="werkzeug-image"><i class="fas fa-tools"></i></div>`;
+            
+            let actionsHtml = '';
+            
+            if (isDashboard) {
+                if (isAvailable) {
+                    actionsHtml = `
+                        <button class="btn btn-primary" onclick="showCheckoutModal(${werkzeug.id})">
+                            <i class="fas fa-sign-out-alt"></i> Ausleihen
+                        </button>
+                    `;
+                } else {
+                    actionsHtml = `
+                        <button class="btn btn-success" onclick="checkinWerkzeug(${werkzeug.id})">
+                            <i class="fas fa-sign-in-alt"></i> Zurückgeben
+                        </button>
+                    `;
+                }
+            } else {
+                actionsHtml = `
+                    <button class="btn btn-primary" onclick="editWerkzeug(${werkzeug.id})">
+                        <i class="fas fa-edit"></i> Bearbeiten
+                    </button>
+                    <button class="btn btn-danger" onclick="deleteWerkzeug(${werkzeug.id})">
+                        <i class="fas fa-trash"></i> Löschen
+                    </button>
+                `;
+            }
+            
+            return `
+                <div class="werkzeug-card">
+                    ${imageHtml}
+                    <div class="werkzeug-info">
+                        <h3>${werkzeug.name}</h3>
+                        <p><strong>Besitzer:</strong> ${owner ? owner.name : 'Unbekannt'}</p>
+                        <p><strong>Status:</strong> 
+                            <span class="status-badge ${isAvailable ? 'status-available' : 'status-borrowed'}">
+                                ${isAvailable ? 'Verfügbar' : 'Ausgeliehen'}
+                            </span>
+                        </p>
+                        ${!isAvailable && borrower ? `<p><strong>Ausgeliehen an:</strong> ${borrower.name}</p>` : ''}
+                        <div class="werkzeug-actions">
+                            ${actionsHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Filter Funktionen
+        function updateOwnerFilter() {
+            const ownerFilter = document.getElementById('ownerFilter');
+            const owners = [...new Set(werkzeuge.map(w => w.owner))];
+            
+            ownerFilter.innerHTML = '<option value="">Alle Besitzer</option>' +
+                owners.map(owner => {
+                    const user = users.find(u => u.username === owner);
+                    return `<option value="${owner}">${user ? user.name : owner}</option>`;
+                }).join('');
+        }
+
+        function getFilteredWerkzeuge() {
+            const ownerFilter = document.getElementById('ownerFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            return werkzeuge.filter(werkzeug => {
+                const ownerMatch = !ownerFilter || werkzeug.owner === ownerFilter;
+                const statusMatch = !statusFilter || werkzeug.status === statusFilter;
+                return ownerMatch && statusMatch;
+            });
+        }
+
+        function filterWerkzeuge() {
+            renderDashboard();
+        }
+
+        function clearFilters() {
+            document.getElementById('ownerFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            renderDashboard();
+        }
+
+        // Werkzeug Modal Funktionen
+        function showWerkzeugModal(werkzeugId = null) {
+            editingWerkzeug = werkzeugId;
+            const modal = document.getElementById('werkzeugModal');
+            const title = document.getElementById('werkzeugModalTitle');
+            
+            const ownerSelect = document.getElementById('werkzeugOwner');
+            ownerSelect.innerHTML = users.map(user => 
+                `<option value="${user.username}" ${user.username === currentUser.username ? 'selected' : ''}>
+                    ${user.name}
+                </option>`
+            ).join('');
+            
+            if (werkzeugId) {
+                const werkzeug = werkzeuge.find(w => w.id === werkzeugId);
+                title.textContent = 'Werkzeug bearbeiten';
+                document.getElementById('werkzeugName').value = werkzeug.name;
+                document.getElementById('werkzeugOwner').value = werkzeug.owner;
+                
+                if (werkzeug.image) {
+                    document.getElementById('imagePreview').src = werkzeug.image;
+                    document.getElementById('imagePreview').classList.remove('hidden');
+                }
+            } else {
+                title.textContent = 'Werkzeug hinzufügen';
+                document.getElementById('werkzeugName').value = '';
+                document.getElementById('werkzeugOwner').value = currentUser.username;
+                document.getElementById('imagePreview').classList.add('hidden');
+            }
+            
+            modal.style.display = 'block';
+        }
+
+        function closeWerkzeugModal() {
+            document.getElementById('werkzeugModal').style.display = 'none';
+            editingWerkzeug = null;
+            stopCamera();
+            document.getElementById('werkzeugName').value = '';
+            document.getElementById('werkzeugImageFile').value = '';
+            document.getElementById('imagePreview').classList.add('hidden');
+        }
+
+        async function saveWerkzeug() {
+            const name = document.getElementById('werkzeugName').value.trim();
+            const owner = document.getElementById('werkzeugOwner').value;
+            const imagePreview = document.getElementById('imagePreview');
+            
+            if (!name) {
+                showToast('Bitte geben Sie einen Namen ein.', 'error');
+                return;
+            }
+            
+            const imageData = !imagePreview.classList.contains('hidden') ? imagePreview.src : null;
+            
+            try {
+                if (editingWerkzeug) {
+                    // Bearbeiten
+                    const werkzeug = werkzeuge.find(w => w.id === editingWerkzeug);
+                    const updatedWerkzeug = {
+                        ...werkzeug,
+                        name: name,
+                        owner: owner,
+                        image: imageData
+                    };
+                    
+                    await saveWerkzeugToServer(updatedWerkzeug);
+                    showToast('Werkzeug wurde aktualisiert.');
+                } else {
+                    // Neu erstellen
+                    const newWerkzeug = {
+                        name: name,
+                        owner: owner,
+                        image: imageData,
+                        status: 'available',
+                        borrower: null,
+                        borrowedDate: null
+                    };
+                    
+                    await saveWerkzeugToServer(newWerkzeug);
+                    showToast('Werkzeug wurde hinzugefügt.');
+                }
+                
+                updateOwnerFilter();
+                renderDashboard();
+                renderWerkzeugManagement();
+                closeWerkzeugModal();
+            } catch (error) {
+                showToast('Fehler beim Speichern des Werkzeugs.', 'error');
+            }
+        }
+
+        function editWerkzeug(id) {
+            showWerkzeugModal(id);
+        }
+
+        function deleteWerkzeug(id) {
+            const werkzeug = werkzeuge.find(w => w.id === id);
+            showConfirmModal('Werkzeug löschen', `Möchten Sie das Werkzeug "${werkzeug.name}" wirklich löschen?`, async function() {
+                try {
+                    await deleteWerkzeugFromServer(id);
+                    updateOwnerFilter();
+                    renderDashboard();
+                    renderWerkzeugManagement();
+                    showToast('Werkzeug wurde gelöscht.');
+                } catch (error) {
+                    showToast('Fehler beim Löschen des Werkzeugs.', 'error');
+                }
+            });
+        }
+
+        async function confirmCheckout() {
+            const borrower = document.getElementById('borrowerSelect').value;
+            const werkzeug = werkzeuge.find(w => w.id === currentWerkzeugForCheckout);
+            
+            if (!werkzeug) {
+                showToast('Werkzeug nicht gefunden.', 'error');
+                return;
+            }
+            
+            const borrowerUser = users.find(u => u.username === borrower);
+            
+            try {
+                const updatedWerkzeug = {
+                    ...werkzeug,
+                    status: 'borrowed',
+                    borrower: borrower,
+                    borrowedDate: new Date().toISOString()
+                };
+                
+                await saveWerkzeugToServer(updatedWerkzeug);
+                
+                renderDashboard();
+                renderWerkzeugManagement();
+                closeCheckoutModal();
+                
+                showToast(`Das Werkzeug "${werkzeug.name}" wurde an ${borrowerUser ? borrowerUser.name : borrower} ausgeliehen.`);
+            } catch (error) {
+                showToast('Fehler beim Ausleihen des Werkzeugs.', 'error');
+            }
+        }
+
+        function checkinWerkzeug(id) {
+            const werkzeug = werkzeuge.find(w => w.id == id);
+            
+            if (!werkzeug) {
+                showToast('Werkzeug nicht gefunden.', 'error');
+                return;
+            }
+            
+            if (werkzeug.status !== 'borrowed') {
+                showToast('Dieses Werkzeug ist nicht ausgeliehen.', 'error');
+                return;
+            }
+            
+            const borrowerUser = users.find(u => u.username === werkzeug.borrower);
+            const confirmMessage = `Möchten Sie das Werkzeug "${werkzeug.name}" von ${borrowerUser ? borrowerUser.name : werkzeug.borrower} zurücknehmen?`;
+            
+            showConfirmModal('Werkzeug zurückgeben', confirmMessage, async function() {
+                try {
+                    const updatedWerkzeug = {
+                        ...werkzeug,
+                        status: 'available',
+                        borrower: null,
+                        borrowedDate: null
+                    };
+                    
+                    await saveWerkzeugToServer(updatedWerkzeug);
+                    
+                    renderDashboard();
+                    renderWerkzeugManagement();
+                    
+                    showToast(`Das Werkzeug "${werkzeug.name}" wurde erfolgreich zurückgegeben.`);
+                } catch (error) {
+                    showToast('Fehler beim Zurückgeben des Werkzeugs.', 'error');
+                }
+            });
+        }
+
+        // User Management mit Server-Integration
+        async function saveUserData() {
+            const name = document.getElementById('userName').value.trim();
+            const username = document.getElementById('userUsername').value.trim();
+            const password = document.getElementById('userPassword').value.trim();
+            const role = document.getElementById('userRole').value;
+            
+            if (!name || !username || !password) {
+                showToast('Bitte füllen Sie alle Felder aus.', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showToast('Das Passwort muss mindestens 6 Zeichen lang sein.', 'error');
+                return;
+            }
+            
+            // Prüfen ob Username bereits existiert
+            const existingUser = users.find(u => u.username === username && u.id !== editingUser);
+            if (existingUser) {
+                showToast('Dieser Benutzername ist bereits vergeben.', 'error');
+                return;
+            }
+            
+            try {
+                if (editingUser) {
+                    // Bearbeiten
+                    const user = users.find(u => u.id === editingUser);
+                    const updatedUser = {
+                        ...user,
+                        name: name,
+                        username: username,
+                        password: password,
+                        role: role
+                    };
+                    
+                    await saveUser(updatedUser);
+                    showToast('Benutzer wurde aktualisiert.');
+                } else {
+                    // Neu erstellen
+                    const newUser = {
+                        name: name,
+                        username: username,
+                        password: password,
+                        role: role
+                    };
+                    
+                    await saveUser(newUser);
+                    showToast('Benutzer wurde hinzugefügt.');
+                }
+                
+                renderUserManagement();
+                updateOwnerFilter();
+                closeUserModal();
+            } catch (error) {
+                showToast('Fehler beim Speichern des Benutzers.', 'error');
+            }
+        }
+
+        function deleteUser(id) {
+            const user = users.find(u => u.id === id);
+            if (user.username === 'admin') {
+                showToast('Der Admin-Benutzer kann nicht gelöscht werden.', 'error');
+                return;
+            }
+            
+            showConfirmModal('Benutzer löschen', `Möchten Sie den Benutzer "${user.name}" wirklich löschen?`, async function() {
+                try {
+                    // Werkzeuge des Benutzers auf admin übertragen
+                    const werkzeugeToUpdate = werkzeuge.filter(w => 
+                        w.owner === user.username || w.borrower === user.username
+                    );
+                    
+                    for (const werkzeug of werkzeugeToUpdate) {
+                        const updatedWerkzeug = { ...werkzeug };
+                        if (werkzeug.owner === user.username) {
+                            updatedWerkzeug.owner = 'admin';
+                        }
+                        if (werkzeug.borrower === user.username) {
+                            updatedWerkzeug.status = 'available';
+                            updatedWerkzeug.borrower = null;
+                            updatedWerkzeug.borrowedDate = null;
+                        }
+                        await saveWerkzeugToServer(updatedWerkzeug);
+                    }
+                    
+                    await deleteUserFromServer(id);
+                    renderUserManagement();
+                    updateOwnerFilter();
+                    renderDashboard();
+                    renderWerkzeugManagement();
+                    showToast('Benutzer wurde gelöscht.');
+                } catch (error) {
+                    showToast('Fehler beim Löschen des Benutzers.', 'error');
+                }
+            });
+        }
+
+        // Export/Import mit Server-Daten
+        function exportData() {
+            const data = {
+                users: users,
+                werkzeuge: werkzeuge,
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `werkzeugverwaltung_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast('Daten wurden erfolgreich exportiert.');
+        }
+
+        async function importData() {
+            const fileInput = document.getElementById('importFile');
+            const file = fileInput.files[0];
+            
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (!data.users || !data.werkzeuge) {
+                        showToast('Ungültiges Datenformat.', 'error');
+                        return;
+                    }
+                    
+                    showConfirmModal('Daten importieren', 'Möchten Sie die aktuellen Server-Daten mit den importierten Daten überschreiben?', async function() {
+                        try {
+                            // Alle bestehenden Daten löschen und neue importieren
+                            // Zuerst alle Werkzeuge löschen
+                            for (const werkzeug of werkzeuge) {
+                                await deleteWerkzeugFromServer(werkzeug.id);
+                            }
+                            
+                            // Dann alle Benutzer außer admin löschen
+                            for (const user of users.filter(u => u.username !== 'admin')) {
+                                await deleteUserFromServer(user.id);
+                            }
+                            
+                            // Neue Daten importieren
+                            for (const user of data.users.filter(u => u.username !== 'admin')) {
+                                await saveUser(user);
+                            }
+                            
+                            for (const werkzeug of data.werkzeuge) {
+                                const { id, ...werkzeugData } = werkzeug; // ID entfernen für neues Objekt
+                                await saveWerkzeugToServer(werkzeugData);
+                            }
+                            
+                            // UI aktualisieren
+                            await Promise.all([loadUsers(), loadWerkzeuge()]);
+                            renderUserManagement();
+                            updateOwnerFilter();
+                            renderDashboard();
+                            renderWerkzeugManagement();
+                            
+                            showToast('Daten erfolgreich importiert.');
+                        } catch (error) {
+                            showToast('Fehler beim Importieren der Daten.', 'error');
+                        }
+                    });
+                } catch (error) {
+                    showToast('Fehler beim Parsen der Datei: ' + error.message, 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function clearAllData() {
+            showConfirmModal('Alle Daten löschen', 'ACHTUNG: Alle Werkzeuge und Benutzer werden vom Server gelöscht! Diese Aktion kann nicht rückgängig gemacht werden.', async function() {
+                try {
+                    // Alle Werkzeuge löschen
+                    for (const werkzeug of werkzeuge) {
+                        await deleteWerkzeugFromServer(werkzeug.id);
+                    }
+                    
+                    // Alle Benutzer außer admin löschen
+                    for (const user of users.filter(u => u.username !== 'admin')) {
+                        await deleteUserFromServer(user.id);
+                    }
+                    
+                    // Standard-Benutzer wieder hinzufügen
+                    await saveUser({ name: 'Max Mustermann', username: 'max', password: 'max123', role: 'user' });
+                    await saveUser({ name: 'Anna Schmidt', username: 'anna', password: 'anna123', role: 'user' });
+                    
+                    // Standard-Werkzeuge hinzufügen
+                    await saveWerkzeugToServer({
+                        name: 'Bohrmaschine',
+                        owner: 'admin',
+                        image: null,
+                        status: 'available',
+                        borrower: null,
+                        borrowedDate: null
+                    });
+                    
+                    await saveWerkzeugToServer({
+                        name: 'Hammer',
+                        owner: 'max',
+                        image: null,
+                        status: 'borrowed',
+                        borrower: 'anna',
+                        borrowedDate: new Date().toISOString()
+                    });
+                    
+                    // UI aktualisieren
+                    await Promise.all([loadUsers(), loadWerkzeuge()]);
+                    renderUserManagement();
+                    updateOwnerFilter();
+                    renderDashboard();
+                    renderWerkzeugManagement();
+                    
+                    showToast('Alle Daten wurden zurückgesetzt.');
+                } catch (error) {
+                    showToast('Fehler beim Zurücksetzen der Daten.', 'error');
+                }
+            });
+        }
+
+        // Kamera Funktionen
+        function startCamera() {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    cameraStream = stream;
+                    const video = document.getElementById('cameraPreview');
+                    video.srcObject = stream;
+                    video.classList.remove('hidden');
+                    document.getElementById('captureBtn').classList.remove('hidden');
+                })
+                .catch(err => {
+                    showToast('Kamera konnte nicht gestartet werden: ' + err.message, 'error');
+                });
+        }
+
+        function stopCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+                document.getElementById('cameraPreview').classList.add('hidden');
+                document.getElementById('captureBtn').classList.add('hidden');
+            }
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById('cameraPreview');
+            const canvas = document.getElementById('cameraCanvas');
+            const context = canvas.getContext('2d');
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0);
+            
+            const imageData = canvas.toDataURL('image/jpeg');
+            const imagePreview = document.getElementById('imagePreview');
+            imagePreview.src = imageData;
+            imagePreview.classList.remove('hidden');
+            
+            stopCamera();
+        }
+
+        function handleFileUpload(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imagePreview = document.getElementById('imagePreview');
+                    imagePreview.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Checkout/Checkin Funktionen
+        function showCheckoutModal(werkzeugId) {
+            currentWerkzeugForCheckout = werkzeugId;
+            const modal = document.getElementById('checkoutModal');
+            const borrowerSelect = document.getElementById('borrowerSelect');
+            
+            borrowerSelect.innerHTML = users.map(user => 
+                `<option value="${user.username}" ${user.username === currentUser.username ? 'selected' : ''}>
+                    ${user.name}
+                </option>`
+            ).join('');
+            
+            modal.style.display = 'block';
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById('checkoutModal').style.display = 'none';
+            currentWerkzeugForCheckout = null;
+        }
+
+        function confirmCheckout() {
+            const borrower = document.getElementById('borrowerSelect').value;
+            const werkzeug = werkzeuge.find(w => w.id === currentWerkzeugForCheckout);
+            
+            if (!werkzeug) {
+                showToast('Werkzeug nicht gefunden.', 'error');
+                return;
+            }
+            
+            const borrowerUser = users.find(u => u.username === borrower);
+            
+            werkzeug.status = 'borrowed';
+            werkzeug.borrower = borrower;
+            werkzeug.borrowedDate = new Date().toISOString();
+            
+            renderDashboard();
+            renderWerkzeugManagement();
+            closeCheckoutModal();
+            
+            showToast(`Das Werkzeug "${werkzeug.name}" wurde an ${borrowerUser ? borrowerUser.name : borrower} ausgeliehen.`);
+        }
+
+        function checkinWerkzeug(id) {
+            const werkzeug = werkzeuge.find(w => w.id == id);
+            
+            if (!werkzeug) {
+                showToast('Werkzeug nicht gefunden.', 'error');
+                return;
+            }
+            
+            if (werkzeug.status !== 'borrowed') {
+                showToast('Dieses Werkzeug ist nicht ausgeliehen.', 'error');
+                return;
+            }
+            
+            const borrowerUser = users.find(u => u.username === werkzeug.borrower);
+            const confirmMessage = `Möchten Sie das Werkzeug "${werkzeug.name}" von ${borrowerUser ? borrowerUser.name : werkzeug.borrower} zurücknehmen?`;
+            
+            showConfirmModal('Werkzeug zurückgeben', confirmMessage, function() {
+                werkzeug.status = 'available';
+                werkzeug.borrower = null;
+                werkzeug.borrowedDate = null;
+                
+                renderDashboard();
+                renderWerkzeugManagement();
+                
+                showToast(`Das Werkzeug "${werkzeug.name}" wurde erfolgreich zurückgegeben.`);
+            });
+        }
+
+        // User Management
+        function renderUserManagement() {
+            if (currentUser && currentUser.role === 'admin') {
+                const userList = document.getElementById('userList');
+                userList.innerHTML = users.map(user => `
+                    <div class="user-item">
+                        <div>
+                            <strong>${user.name}</strong> (${user.username})
+                            <span class="status-badge ${user.role === 'admin' ? 'status-borrowed' : 'status-available'}">
+                                ${user.role === 'admin' ? 'Admin' : 'Benutzer'}
+                            </span>
+                        </div>
+                        <div>
+                            <button class="btn btn-primary" onclick="editUser(${user.id})" style="margin-right: 5px;">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            ${user.username !== 'admin' ? `
+                                <button class="btn btn-danger" onclick="deleteUser(${user.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Angepasste saveUser Funktion für Modal
+        async function saveUserFromModal() {
+            await saveUserData();
+        }
+
+        // Enter-Taste im Login-Formular und Initialisierung
+        document.addEventListener('DOMContentLoaded', async function() {
+            const loginUsername = document.getElementById('loginUsername');
+            const loginPassword = document.getElementById('loginPassword');
+            
+            [loginUsername, loginPassword].forEach(field => {
+                field.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        login();
+                    }
+                });
+            });
+            
+            // Versuche initial die Daten zu laden für bessere Performance
+            try {
+                await Promise.all([loadUsers(), loadWerkzeuge()]);
+            } catch (error) {
+                console.log('Initial data loading failed, will try again at login');
+            }
+        });
+
+        function showUserModal(userId = null) {
+            editingUser = userId;
+            const modal = document.getElementById('userModal');
+            const title = document.getElementById('userModalTitle');
+            
+            if (userId) {
+                const user = users.find(u => u.id === userId);
+                title.textContent = 'Benutzer bearbeiten';
+                document.getElementById('userName').value = user.name;
+                document.getElementById('userUsername').value = user.username;
+                document.getElementById('userPassword').value = user.password;
+                document.getElementById('userRole').value = user.role;
+                document.getElementById('userUsername').disabled = user.username === 'admin';
+            } else {
+                title.textContent = 'Benutzer hinzufügen';
+                document.getElementById('userName').value = '';
+                document.getElementById('userUsername').value = '';
+                document.getElementById('userPassword').value = '';
+                document.getElementById('userRole').value = 'user';
+                document.getElementById('userUsername').disabled = false;
+            }
+            
+            modal.style.display = 'block';
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').style.display = 'none';
+            editingUser = null;
+            document.getElementById('userName').value = '';
+            document.getElementById('userUsername').value = '';
+            document.getElementById('userPassword').value = '';
+            document.getElementById('userRole').value = 'user';
+        }
+
+        function saveUser() {
+            const name = document.getElementById('userName').value.trim();
+            const username = document.getElementById('userUsername').value.trim();
+            const password = document.getElementById('userPassword').value.trim();
+            const role = document.getElementById('userRole').value;
+            
+            if (!name || !username || !password) {
+                showToast('Bitte füllen Sie alle Felder aus.', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showToast('Das Passwort muss mindestens 6 Zeichen lang sein.', 'error');
+                return;
+            }
+            
+            // Prüfen ob Username bereits existiert
+            const existingUser = users.find(u => u.username === username && u.id !== editingUser);
+            if (existingUser) {
+                showToast('Dieser Benutzername ist bereits vergeben.', 'error');
+                return;
+            }
+            
+            if (editingUser) {
+                // Bearbeiten
+                const user = users.find(u => u.id === editingUser);
+                user.name = name;
+                user.username = username;
+                user.password = password;
+                user.role = role;
+                showToast('Benutzer wurde aktualisiert.');
+            } else {
+                // Neu erstellen
+                const newId = Math.max(...users.map(u => u.id), 0) + 1;
+                users.push({
+                    id: newId,
+                    name: name,
+                    username: username,
+                    password: password,
+                    role: role
+                });
+                showToast('Benutzer wurde hinzugefügt.');
+            }
+            
+            saveToStorage(); // Daten speichern
+            renderUserManagement();
+            updateOwnerFilter();
+            closeUserModal();
+        }
+
+        function editUser(id) {
+            showUserModal(id);
+        }
+
+        function deleteUser(id) {
+            const user = users.find(u => u.id === id);
+            if (user.username === 'admin') {
+                showToast('Der Admin-Benutzer kann nicht gelöscht werden.', 'error');
+                return;
+            }
+            
+            showConfirmModal('Benutzer löschen', `Möchten Sie den Benutzer "${user.name}" wirklich löschen?`, function() {
+                // Werkzeuge des Benutzers auf admin übertragen
+                werkzeuge.forEach(w => {
+                    if (w.owner === user.username) {
+                        w.owner = 'admin';
+                    }
+                    if (w.borrower === user.username) {
+                        w.status = 'available';
+                        w.borrower = null;
+                        w.borrowedDate = null;
+                    }
+                });
+                
+                users = users.filter(u => u.id !== id);
+                saveToStorage(); // Daten speichern
+                renderUserManagement();
+                updateOwnerFilter();
+                renderDashboard();
+                renderWerkzeugManagement();
+                showToast('Benutzer wurde gelöscht.');
+            });
+        }
+
+        // Import/Export Funktionen
+        function exportData() {
+            const data = {
+                users: users,
+                werkzeuge: werkzeuge,
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `werkzeugverwaltung_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast('Daten wurden erfolgreich exportiert.');
+        }
+
+        function importData() {
+            const fileInput = document.getElementById('importFile');
+            const file = fileInput.files[0];
+            
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (!data.users || !data.werkzeuge) {
+                        showToast('Ungültiges Datenformat.', 'error');
+                        return;
+                    }
+                    
+                    showConfirmModal('Daten importieren', 'Möchten Sie die aktuellen Daten mit den importierten Daten überschreiben?', function() {
+                        users = data.users;
+                        werkzeuge = data.werkzeuge;
+                        
+                        saveToStorage(); // Daten speichern
+                        
+                        // UI aktualisieren
+                        renderUserManagement();
+                        updateOwnerFilter();
+                        renderDashboard();
+                        renderWerkzeugManagement();
+                        
+                        showToast('Daten erfolgreich importiert.');
+                    });
+                } catch (error) {
+                    showToast('Fehler beim Importieren der Daten: ' + error.message, 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Modal Event Listeners für Klick außerhalb
+        window.onclick = function(event) {
+            const modals = ['werkzeugModal', 'userModal', 'checkoutModal', 'confirmModal'];
+            modals.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        };
+
+        // Enter-Taste im Login-Formular und Drag & Drop
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginUsername = document.getElementById('loginUsername');
+            const loginPassword = document.getElementById('loginPassword');
+            
+            [loginUsername, loginPassword].forEach(field => {
+                field.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        login();
+                    }
+                });
+            });
+            
+            // Drag & Drop für Bilder wird später initialisiert wenn Modal geöffnet wird
+        });
+
+        // Drag & Drop für Werkzeug-Bilder
+        function initializeImageUpload() {
+            const fileUpload = document.querySelector('.file-upload');
+            if (fileUpload && !fileUpload.hasAttribute('data-initialized')) {
+                fileUpload.setAttribute('data-initialized', 'true');
+                
+                fileUpload.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    this.classList.add('dragover');
+                });
+                
+                fileUpload.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('dragover');
+                });
+                
+                fileUpload.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('dragover');
+                    
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0 && files[0].type.startsWith('image/')) {
+                        const fileInput = document.getElementById('werkzeugImageFile');
+                        fileInput.files = files;
+                        handleFileUpload(fileInput);
+                    }
+                });
+            }
+        }
+
+        // Override der showWerkzeugModal Funktion um Drag & Drop zu initialisieren
+        const originalShowWerkzeugModal = showWerkzeugModal;
+        showWerkzeugModal = function(werkzeugId = null) {
+            originalShowWerkzeugModal(werkzeugId);
+            setTimeout(initializeImageUpload, 100); // Kurze Verzögerung für DOM-Update
+        };
+    </script>
+</body>
+</html>

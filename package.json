@@ -1,0 +1,13 @@
+{
+  "name": "werkzeugverwaltung",
+  "version": "1.0.0",
+  "description": "Werkzeugverwaltung mit Netlify Functions",
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "echo 'Static site - no build needed'"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "netlify-cli": "^17.0.0"
+  }
+}
